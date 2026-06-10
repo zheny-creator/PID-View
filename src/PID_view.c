@@ -185,9 +185,8 @@ int main(int argv, char *args[]) {
     }
     printf("Threads:      %d\n", process.threads);
     printf("Virtual Mem:  %ld MB\n", process.vmem_mb);
-    printf("Physical Mem: %ld MB (RSS)\n", process.rss_mb);
+    printf("Physical Mem: %ld MB (RSS) (%.2f%%)\n", process.rss_mb, process.all_memory);
     printf("Running Time: %02ld:%02ld:%02ld\n", h, m, s);
-    printf("Memory consumption: %.2f%%\n", process.all_memory);
     printf("=====================\n");
 
     return 0;
