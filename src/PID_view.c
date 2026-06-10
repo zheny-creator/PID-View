@@ -20,6 +20,7 @@ struct process_in_ram {
     long vmem_mb;
     long rss_mb;
     long uptime_sec;
+    double all_memory;
 };
 
 void parse_proc_status(const char *buffer, struct process_in_ram *proc) {
@@ -86,7 +87,6 @@ void parse_advanced_metrics(struct process_in_ram *proc) {
     if ((fd = open(path, O_RDONLY)) >= 0) {
         if ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
             buf[n] = '\0';
-            
             const char *p = strrchr(buf, ')');
             if (p) {
                 p += 2;
@@ -101,6 +101,40 @@ void parse_advanced_metrics(struct process_in_ram *proc) {
             }
         }
         close(fd);
+    }
+}
+void parse_all_aviable_memory(struct process_in_ram *proc)
+{
+    char path[32];
+    char buffer[1024];
+    const char *line = buffer;
+    long long all_memory = 0;
+    int fd;
+    ssize_t read_buffer;
+
+    snprintf(path, sizeof(path), "/proc/meminfo");
+    if ((fd = open(path, O_RDONLY)) >= 0) {
+        if ((read_buffer = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
+            buffer[read_buffer] = '\0';
+        }
+    }
+    close(fd);
+    while (*line)
+    {
+        if (strncmp(line, "MemTotal:", 9) == 0) {
+            long mem_kb = 0;
+            if (sscanf(line, "MemTotal:\t%ld", &mem_kb) == 1) {
+               all_memory = mem_kb / 1024;
+            }
+            break; 
+        }
+        while (*line && *line != '\n') line++; 
+            if (*line == '\n') line++;
+    }
+    if (all_memory > 0) {
+       proc->all_memory = ((double)proc->rss_mb / (double)all_memory) * 100.0;
+    } else {
+        proc->all_memory = 0;
     }
 }
 
@@ -134,6 +168,7 @@ int main(int argv, char *args[]) {
 
     parse_proc_status(buffer, &process);
     parse_advanced_metrics(&process);
+    parse_all_aviable_memory(&process);
 
     long h = process.uptime_sec / 3600;
     long m = (process.uptime_sec % 3600) / 60;
@@ -152,7 +187,8 @@ int main(int argv, char *args[]) {
     printf("Virtual Mem:  %ld MB\n", process.vmem_mb);
     printf("Physical Mem: %ld MB (RSS)\n", process.rss_mb);
     printf("Running Time: %02ld:%02ld:%02ld\n", h, m, s);
+    printf("Memory consumption: %.2f%%\n", process.all_memory);
     printf("=====================\n");
-    
+
     return 0;
 }
