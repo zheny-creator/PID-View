@@ -137,10 +137,16 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
         proc->all_memory = 0;
     }
 }
+void usage(void) {
+    fprintf(stderr, "Usage:\n");
+    fprintf(stderr, "  ./pid-view -h, --help           Show help message\n");
+    fprintf(stderr, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
+    fprintf(stderr, "  ./pid-view <PID>                Display current process status\n");
+}
 
 int main(int argv, char *args[]) {
     if (argv < 2) {
-        fprintf(stderr, "Usage: %s <PID>\n", args[0]);
+        usage();
         return 1;
     }
 
