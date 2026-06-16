@@ -136,7 +136,7 @@ void parse_advanced_metrics(struct process_in_ram *proc)
 void parse_all_aviable_memory(struct process_in_ram *proc)
 {
     char path[32];
-    char buffer[1024];
+    char buffer[1024] = {0};
     const char *line = buffer;
     long long all_memory = 0;
     int fd;
@@ -149,6 +149,10 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
         {
             buffer[read_buffer] = '\0';
         }
+    }
+    else
+    {
+        proc->all_memory = 0;
     }
     close(fd);
     while (*line)
