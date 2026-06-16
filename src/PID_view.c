@@ -138,7 +138,7 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
     }
 }
 void usage(void) {
-    fprintf(stderr, "Usage:\n");
+    fprintf(stderr, "Usage: pid-view [options]\n");
     fprintf(stderr, "  ./pid-view -h, --help           Show help message\n");
     fprintf(stderr, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
     fprintf(stderr, "  ./pid-view <PID>                Display current process status\n");
