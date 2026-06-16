@@ -8,8 +8,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <time.h>
+#include <getopt.h>
 
-struct process_in_ram {
+struct process_in_ram
+{
     char name[16];
     int priority;
     char state;
@@ -23,37 +25,56 @@ struct process_in_ram {
     double all_memory;
 };
 
-void parse_proc_status(const char *buffer, struct process_in_ram *proc) {
+void parse_proc_status(const char *buffer, struct process_in_ram *proc)
+{
     const char *line = buffer;
     int raw_uid = -1;
 
-    while (*line) {
-        if (strncmp(line, "Name:", 5) == 0) {
+    while (*line)
+    {
+        if (strncmp(line, "Name:", 5) == 0)
+        {
             sscanf(line, "Name:\t%15[^\n]", proc->name);
-        } else if (strncmp(line, "State:", 6) == 0) {
+        }
+        else if (strncmp(line, "State:", 6) == 0)
+        {
             sscanf(line, "State:\t%c", &proc->state);
-        } else if (strncmp(line, "PPid:", 5) == 0) {
+        }
+        else if (strncmp(line, "PPid:", 5) == 0)
+        {
             sscanf(line, "PPid:\t%d", &proc->ppid);
-        } else if (strncmp(line, "Threads:", 8) == 0) {
+        }
+        else if (strncmp(line, "Threads:", 8) == 0)
+        {
             sscanf(line, "Threads:\t%d", &proc->threads);
-        } else if (strncmp(line, "Uid:", 4) == 0) {
+        }
+        else if (strncmp(line, "Uid:", 4) == 0)
+        {
             sscanf(line, "Uid:\t%d", &raw_uid);
         }
 
-        while (*line && *line != '\n') line++;
-        if (*line == '\n') line++;
+        while (*line && *line != '\n')
+            line++;
+        if (*line == '\n')
+            line++;
     }
 
-    if (raw_uid != -1) {
+    if (raw_uid != -1)
+    {
         struct passwd *pw = getpwuid(raw_uid);
-        if (pw) strncpy(proc->uid_name, pw->pw_name, sizeof(proc->uid_name) - 1);
-        else snprintf(proc->uid_name, sizeof(proc->uid_name), "%d", raw_uid);
-    } else {
+        if (pw)
+            strncpy(proc->uid_name, pw->pw_name, sizeof(proc->uid_name) - 1);
+        else
+            snprintf(proc->uid_name, sizeof(proc->uid_name), "%d", raw_uid);
+    }
+    else
+    {
         strcpy(proc->uid_name, "unknown");
     }
 }
 
-void parse_advanced_metrics(struct process_in_ram *proc) {
+void parse_advanced_metrics(struct process_in_ram *proc)
+{
     char path[32];
     char buf[512];
     int fd;
@@ -63,8 +84,10 @@ void parse_advanced_metrics(struct process_in_ram *proc) {
     long clock_ticks = sysconf(_SC_CLK_TCK);
 
     snprintf(path, sizeof(path), "/proc/%d/statm", proc->pid);
-    if ((fd = open(path, O_RDONLY)) >= 0) {
-        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
+    if ((fd = open(path, O_RDONLY)) >= 0)
+    {
+        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0)
+        {
             buf[n] = '\0';
             long vmem_pages = 0, rss_pages = 0;
             sscanf(buf, "%ld %ld", &vmem_pages, &rss_pages);
@@ -75,8 +98,10 @@ void parse_advanced_metrics(struct process_in_ram *proc) {
     }
 
     double uptime_sys = 0.0;
-    if ((fd = open("/proc/uptime", O_RDONLY)) >= 0) {
-        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
+    if ((fd = open("/proc/uptime", O_RDONLY)) >= 0)
+    {
+        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0)
+        {
             buf[n] = '\0';
             sscanf(buf, "%lf", &uptime_sys);
         }
@@ -84,19 +109,24 @@ void parse_advanced_metrics(struct process_in_ram *proc) {
     }
 
     snprintf(path, sizeof(path), "/proc/%d/stat", proc->pid);
-    if ((fd = open(path, O_RDONLY)) >= 0) {
-        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
+    if ((fd = open(path, O_RDONLY)) >= 0)
+    {
+        if ((n = read(fd, buf, sizeof(buf) - 1)) > 0)
+        {
             buf[n] = '\0';
             const char *p = strrchr(buf, ')');
-            if (p) {
+            if (p)
+            {
                 p += 2;
                 long unsigned starttime = 0;
-                int scanned = sscanf(p, "%*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %d %*d %*d %*d %lu", 
+                int scanned = sscanf(p, "%*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %d %*d %*d %*d %lu",
                                      &proc->priority, &starttime);
-                if (scanned == 2) {
+                if (scanned == 2)
+                {
                     double process_start_sec = (double)starttime / clock_ticks;
                     proc->uptime_sec = (long)(uptime_sys - process_start_sec);
-                    if (proc->uptime_sec < 0) proc->uptime_sec = 0;
+                    if (proc->uptime_sec < 0)
+                        proc->uptime_sec = 0;
                 }
             }
         }
@@ -113,43 +143,79 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
     ssize_t read_buffer;
 
     snprintf(path, sizeof(path), "/proc/meminfo");
-    if ((fd = open(path, O_RDONLY)) >= 0) {
-        if ((read_buffer = read(fd, buffer, sizeof(buffer) - 1)) > 0) {
+    if ((fd = open(path, O_RDONLY)) >= 0)
+    {
+        if ((read_buffer = read(fd, buffer, sizeof(buffer) - 1)) > 0)
+        {
             buffer[read_buffer] = '\0';
         }
     }
     close(fd);
     while (*line)
     {
-        if (strncmp(line, "MemTotal:", 9) == 0) {
+        if (strncmp(line, "MemTotal:", 9) == 0)
+        {
             long mem_kb = 0;
-            if (sscanf(line, "MemTotal:\t%ld", &mem_kb) == 1) {
-               all_memory = mem_kb / 1024;
+            if (sscanf(line, "MemTotal:\t%ld", &mem_kb) == 1)
+            {
+                all_memory = mem_kb / 1024;
             }
-            break; 
+            break;
         }
-        while (*line && *line != '\n') line++; 
-            if (*line == '\n') line++;
+        while (*line && *line != '\n')
+            line++;
+        if (*line == '\n')
+            line++;
     }
-    if (all_memory > 0) {
-       proc->all_memory = ((double)proc->rss_mb / (double)all_memory) * 100.0;
-    } else {
+    if (all_memory > 0)
+    {
+        proc->all_memory = ((double)proc->rss_mb / (double)all_memory) * 100.0;
+    }
+    else
+    {
         proc->all_memory = 0;
     }
 }
-void usage(void) {
+void usage(void)
+{
     fprintf(stderr, "Usage: pid-view [options]\n");
     fprintf(stderr, "  ./pid-view -h, --help           Show help message\n");
     fprintf(stderr, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
     fprintf(stderr, "  ./pid-view <PID>                Display current process status\n");
 }
 
-int main(int argv, char *args[]) {
-    if (argv < 2) {
+int main(int argv, char *args[])
+{
+    if (argv < 2)
+    {
         usage();
         return 1;
     }
-
+    struct option arguments[] =
+        {
+            {"help", no_argument, NULL, 'h'},
+            {"watch", required_argument, NULL, 'w'},
+            {NULL, 0, NULL, 0}};
+    int opt;
+    while ((opt = getopt_long(argv, args, "hw:", arguments, NULL)) != -1)
+    {
+        switch (opt)
+        {
+        case 'h':
+            fprintf(stdout, "Usage: pid-view [options]\n");
+            fprintf(stdout, "  ./pid-view -h, --help           Show help message\n");
+            fprintf(stdout, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
+            fprintf(stdout, "  ./pid-view <PID>                Display current process status\n");
+            return 0;
+            break;
+        case 'w':
+            printf("Coming soon!");
+            break;
+        default:
+            fprintf(stderr, "Unknown argument!");
+            return 1;
+        }
+    }
     struct process_in_ram process = {0};
     process.pid = atoi(args[1]);
     char filepath[32];
@@ -158,7 +224,8 @@ int main(int argv, char *args[]) {
     snprintf(filepath, sizeof(filepath), "/proc/%d/status", process.pid);
 
     int fd = open(filepath, O_RDONLY);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         fprintf(stderr, "Process %d not found\n", process.pid);
         return 1;
     }
@@ -166,7 +233,8 @@ int main(int argv, char *args[]) {
     ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
     close(fd);
 
-    if (bytes_read <= 0) {
+    if (bytes_read <= 0)
+    {
         fprintf(stderr, "Failed to read status\n");
         return 1;
     }
@@ -186,7 +254,8 @@ int main(int argv, char *args[]) {
     printf("Owner:        %s\n", process.uid_name);
     printf("State:        %c\n", process.state);
     printf("Priority:     %d\n", process.priority - 20);
-    if (process.ppid != 0) {
+    if (process.ppid != 0)
+    {
         printf("Parent PID:   %d\n", process.ppid);
     }
     printf("Threads:      %d\n", process.threads);
