@@ -3,6 +3,9 @@
 int main(int argc, char *argv[])
 {
     int watch = 0;
+    char *endptr;
+    long val = 0;
+    long time = 0;
     if (argc < 2)
     {
         usage();
@@ -15,6 +18,7 @@ int main(int argc, char *argv[])
             {"seconds", required_argument, NULL, 's'},
             {NULL, 0, NULL, 0}};
     int opt;
+    struct process_in_ram process = {0};
     while ((opt = getopt_long(argc, argv, "hw:s:", arguments, NULL)) != -1)
     {
         switch (opt)
@@ -24,31 +28,27 @@ int main(int argc, char *argv[])
             return 0;
             break;
         case 'w':
+            errno = 0;
+            val = strtol(argv[2], &endptr, 0);
             watch = 1;
+
             break;
         case 's':
+            errno = 0;
             watch = 2;
+            time = strtol(argv[4], &endptr, 0);
             break;
         default:
             fprintf(stderr, "Unknown argument!");
             return 1;
         }
     }
-    struct process_in_ram process = {0};
     if (watch == 0)
     {
-        process.pid = atoi(argv[1]);
+        val = strtol(argv[1], &endptr, 0);
     }
-    else
-    {
-        process.pid = atoi(argv[2]);
-    }
-    if (watch == 2)
-    {
-        process.pid = atoi(argv[2]);
-        process.seconds_update = atoi(argv[4]);
-    }
-
+    process.pid = (pid_t)val;
+    process.seconds_update = (int)time;
     while (true)
     {
         char filepath[32];
@@ -117,10 +117,6 @@ int main(int argc, char *argv[])
         if (watch == 0)
         {
             break;
-        }
-        else
-        {
-            continue;
         }
     }
 
