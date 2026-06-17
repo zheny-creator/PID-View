@@ -24,6 +24,7 @@ struct process_in_ram
     long rss_mb;
     long uptime_sec;
     double all_memory;
+    int seconds_update;
 };
 
 void parse_proc_status(const char *buffer, struct process_in_ram *proc)
@@ -183,15 +184,17 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
 }
 void usage(void)
 {
-    fprintf(stderr, "Usage: pid-view [options]\n");
-    fprintf(stderr, "  ./pid-view -h, --help           Show help message\n");
-    fprintf(stderr, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
-    fprintf(stderr, "  ./pid-view <PID>                Display current process status\n");
+    fprintf(stdout, "Usage: pid-view [options]\n");
+    fprintf(stdout, "   -h, --help           Show help message\n");
+    fprintf(stdout, "   -w, --watch <PID>    Monitor process activity\n");
+    fprintf(stdout, "   -s, --seconds <SEC>  Update interval in seconds\n");
+    fprintf(stdout, "   <PID>                Display current process status\n");
 }
 
 int main(int argv, char *args[])
 {
     int watch = 0;
+    int seconds = 0;
     if (argv < 2)
     {
         usage();
@@ -201,21 +204,30 @@ int main(int argv, char *args[])
         {
             {"help", no_argument, NULL, 'h'},
             {"watch", required_argument, NULL, 'w'},
+            {"seconds", required_argument, NULL, 's'},
             {NULL, 0, NULL, 0}};
     int opt;
-    while ((opt = getopt_long(argv, args, "hw:", arguments, NULL)) != -1)
+    while ((opt = getopt_long(argv, args, "hw:s:", arguments, NULL)) != -1)
     {
         switch (opt)
         {
         case 'h':
-            fprintf(stdout, "Usage: pid-view [options]\n");
-            fprintf(stdout, "  ./pid-view -h, --help           Show help message\n");
-            fprintf(stdout, "  ./pid-view -w, --watch <PID>    Monitor process activity\n");
-            fprintf(stdout, "  ./pid-view <PID>                Display current process status\n");
+            usage();
             return 0;
             break;
         case 'w':
             watch = 1;
+            break;
+        case 's':
+            if (watch == 1)
+            {
+                seconds = 1;
+            }
+            else
+            {
+                watch = 2;
+                seconds = 1;
+            }
             break;
         default:
             fprintf(stderr, "Unknown argument!");
@@ -231,6 +243,17 @@ int main(int argv, char *args[])
     {
         process.pid = atoi(args[2]);
     }
+    if (watch == 1 && seconds == 1)
+    {
+        process.pid = atoi(args[2]);
+        process.seconds_update = atoi(args[4]);
+    }
+    else if (watch == 2)
+    {
+        process.pid = atoi(args[3]);
+        process.seconds_update = atoi(args[2]);
+    }
+
     while (true)
     {
         char filepath[32];
@@ -287,7 +310,18 @@ int main(int argv, char *args[])
 
         fflush(stdout);
 
-        sleep(1);
+        if (watch == 1 && seconds == 0)
+        {
+            sleep(1);
+        }
+        else if (watch == 1 && seconds == 1)
+        {
+            sleep(process.seconds_update);
+        }
+        else if (watch == 2)
+        {
+            sleep(process.seconds_update);
+        }
         if (watch == 0)
         {
             break;
