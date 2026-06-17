@@ -3,7 +3,6 @@
 int main(int argv, char *args[])
 {
     int watch = 0;
-    int seconds = 0;
     if (argv < 2)
     {
         usage();
@@ -28,15 +27,7 @@ int main(int argv, char *args[])
             watch = 1;
             break;
         case 's':
-            if (watch == 1)
-            {
-                seconds = 1;
-            }
-            else
-            {
-                watch = 2;
-                seconds = 1;
-            }
+            watch = 2;
             break;
         default:
             fprintf(stderr, "Unknown argument!");
@@ -52,15 +43,10 @@ int main(int argv, char *args[])
     {
         process.pid = atoi(args[2]);
     }
-    if (watch == 1 && seconds == 1)
+    if (watch == 2)
     {
         process.pid = atoi(args[2]);
         process.seconds_update = atoi(args[4]);
-    }
-    else if (watch == 2)
-    {
-        process.pid = atoi(args[3]);
-        process.seconds_update = atoi(args[2]);
     }
 
     while (true)
@@ -73,7 +59,7 @@ int main(int argv, char *args[])
         int fd = open(filepath, O_RDONLY);
         if (fd < 0)
         {
-            fprintf(stderr, "Process %d not found\n", process.pid);
+            fprintf(stderr, "Process %d not found or kill\n", process.pid);
             return 1;
         }
 
@@ -95,37 +81,34 @@ int main(int argv, char *args[])
         long m = (process.uptime_sec % 3600) / 60;
         long s = process.uptime_sec % 60;
 
+        printf("\033[H\033[J");
         printf("=== PID-View v0.4 ===\n");
-        printf("PID:          %d\033[K\n", process.pid);
-        printf("Name:         %s\033[K\n", process.name);
-        printf("Owner:        %s\033[K\n", process.uid_name);
-        printf("State:        %c\033[K\n", process.state);
-        printf("Priority:     %d\033[K\n", process.priority - 20);
+        printf("PID:          %d\n", process.pid);
+        printf("Name:         %s\n", process.name);
+        printf("Owner:        %s\n", process.uid_name);
+        printf("State:        %c\n", process.state);
+        printf("Priority:     %d\n", process.priority - 20);
 
         if (process.ppid != 0)
         {
-            printf("Parent PID:   %d\033[K\n", process.ppid);
+            printf("Parent PID:   %d\n", process.ppid);
         }
         else
         {
-            printf("Parent PID:   None\033[K\n");
+            printf("Parent PID:   None\n");
         }
 
-        printf("Threads:      %d\033[K\n", process.threads);
-        printf("Virtual Mem:  %ld MB\033[K\n", process.vmem_mb);
-        printf("Physical Mem: %ld MB (RSS) (%.2f%%)\033[K\n", process.rss_mb, process.all_memory);
-        printf("Running Time: %02ld:%02ld:%02ld\033[K\n", h, m, s);
+        printf("Threads:      %d\n", process.threads);
+        printf("Virtual Mem:  %ld MB\n", process.vmem_mb);
+        printf("Physical Mem: %ld MB (RSS) (%.2f%%)\n", process.rss_mb, process.all_memory);
+        printf("Running Time: %02ld:%02ld:%02ld\n", h, m, s);
         printf("=====================\n");
 
         fflush(stdout);
 
-        if (watch == 1 && seconds == 0)
+        if (watch == 1)
         {
             sleep(1);
-        }
-        else if (watch == 1 && seconds == 1)
-        {
-            sleep(process.seconds_update);
         }
         else if (watch == 2)
         {
@@ -137,7 +120,6 @@ int main(int argv, char *args[])
         }
         else
         {
-            printf("\033[12A");
             continue;
         }
     }
