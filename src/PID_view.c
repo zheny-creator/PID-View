@@ -1,9 +1,9 @@
 #include "PID_view.h"
 
-int main(int argv, char *args[])
+int main(int argc, char *argv[])
 {
     int watch = 0;
-    if (argv < 2)
+    if (argc < 2)
     {
         usage();
         return 1;
@@ -15,7 +15,7 @@ int main(int argv, char *args[])
             {"seconds", required_argument, NULL, 's'},
             {NULL, 0, NULL, 0}};
     int opt;
-    while ((opt = getopt_long(argv, args, "hw:s:", arguments, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "hw:s:", arguments, NULL)) != -1)
     {
         switch (opt)
         {
@@ -37,16 +37,16 @@ int main(int argv, char *args[])
     struct process_in_ram process = {0};
     if (watch == 0)
     {
-        process.pid = atoi(args[1]);
+        process.pid = atoi(argv[1]);
     }
     else
     {
-        process.pid = atoi(args[2]);
+        process.pid = atoi(argv[2]);
     }
     if (watch == 2)
     {
-        process.pid = atoi(args[2]);
-        process.seconds_update = atoi(args[4]);
+        process.pid = atoi(argv[2]);
+        process.seconds_update = atoi(argv[4]);
     }
 
     while (true)
