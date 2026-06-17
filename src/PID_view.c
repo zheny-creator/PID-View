@@ -9,7 +9,7 @@ int main(int argv, char *args[])
         usage();
         return 1;
     }
-    struct option arguments[] =
+    static const struct option arguments[] =
         {
             {"help", no_argument, NULL, 'h'},
             {"watch", required_argument, NULL, 'w'},
