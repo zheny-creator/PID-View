@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         long s = process.uptime_sec % 60;
 
         printf("\033[H\033[J");
-        printf("=== PID-View v0.4 ===\n");
+        printf("=== PID-View v0.5 ===\n");
         printf("PID:          %d\n", process.pid);
         printf("Name:         %s\n", process.name);
         printf("Owner:        %s\n", process.uid_name);
