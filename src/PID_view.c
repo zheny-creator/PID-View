@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
             time = strtol(argv[4], &endptr, 0);
             break;
         default:
-            fprintf(stderr, "Unknown argument!");
+            fprintf(stderr, "Unknown argument!\n");
+            usage();
             return 1;
         }
     }
