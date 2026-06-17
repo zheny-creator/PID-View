@@ -98,6 +98,11 @@ void parse_advanced_metrics(struct process_in_ram *proc)
         }
         close(fd);
     }
+    else
+    {
+        proc->vmem_mb = 0;
+        proc->rss_mb = 0;
+    }
 
     double uptime_sys = 0.0;
     if ((fd = open("/proc/uptime", O_RDONLY)) >= 0)
@@ -131,6 +136,10 @@ void parse_advanced_metrics(struct process_in_ram *proc)
                         proc->uptime_sec = 0;
                 }
             }
+        }
+        else
+        {
+            proc->uptime_sec = 0;
         }
         close(fd);
     }
