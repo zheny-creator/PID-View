@@ -29,14 +29,14 @@ int main(int argc, char *argv[])
             break;
         case 'w':
             errno = 0;
-            val = strtol(argv[2], &endptr, 0);
+            val = strtol(optarg, &endptr, 0);
             watch = 1;
 
             break;
         case 's':
             errno = 0;
             watch = 2;
-            time = strtol(argv[4], &endptr, 0);
+            time = strtol(optarg, &endptr, 0);
             break;
         default:
             fprintf(stderr, "Unknown argument!\n");
@@ -46,7 +46,11 @@ int main(int argc, char *argv[])
     }
     if (watch == 0)
     {
-        val = strtol(argv[1], &endptr, 0);
+        val = strtol(optarg, &endptr, 0);
+    }
+    if (optind >= argc)
+    {
+        usage();
     }
     process.pid = (pid_t)val;
     process.seconds_update = (int)time;
