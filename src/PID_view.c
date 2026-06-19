@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
 {
     int watch = 0;
     char *endptr;
-    long val = 0;
     long time = 0;
+    long pid_val = 0;
     if (argc < 2)
     {
         usage();
@@ -31,9 +31,7 @@ int main(int argc, char *argv[])
             break;
         case 'w':
             errno = 0;
-            val = strtol(optarg, &endptr, 0);
             watch = 1;
-
             break;
         case 's':
             errno = 0;
@@ -50,11 +48,8 @@ int main(int argc, char *argv[])
         usage();
         return 1;
     }
-    if (watch == 0)
-    {
-        val = strtol(argv[optind], &endptr, 0);
-    }
-    process.pid = (pid_t)val;
+    pid_val = strtol(argv[optind], &endptr, 0);
+    process.pid = (pid_t)pid_val;
     process.seconds_update = (int)time;
     while (true)
     {
