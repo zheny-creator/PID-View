@@ -39,14 +39,13 @@ int main(int argc, char *argv[])
             time = strtol(optarg, &endptr, 0);
             break;
         default:
-            fprintf(stderr, "Unknown argument!\n");
             usage();
             return 1;
         }
     }
     if (watch == 0)
     {
-        val = strtol(optarg, &endptr, 0);
+        val = strtol(argv[1], &endptr, 0);
     }
     if (optind >= argc)
     {
