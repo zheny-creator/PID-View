@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
             return 0;
             break;
         case 'w':
-            errno = 0;
             watch = 1;
             break;
         case 's':
@@ -38,9 +37,6 @@ int main(int argc, char *argv[])
             watch = 2;
             time = strtol(optarg, &endptr, 0);
             break;
-        default:
-            usage();
-            return 1;
         }
     }
     if (optind >= argc)
