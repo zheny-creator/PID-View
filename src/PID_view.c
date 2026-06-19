@@ -1,5 +1,5 @@
 #include "PID_view.h"
-#define BUFER_MAX 1025
+#define BUFFER_MAX 1025
 #define PATH_MAX 32
 
 int main(int argc, char *argv[])
@@ -45,20 +45,21 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
-    if (watch == 0)
-    {
-        val = strtol(argv[1], &endptr, 0);
-    }
     if (optind >= argc)
     {
         usage();
+        return 1;
+    }
+    if (watch == 0)
+    {
+        val = strtol(argv[optind], &endptr, 0);
     }
     process.pid = (pid_t)val;
     process.seconds_update = (int)time;
     while (true)
     {
         char filepath[PATH_MAX];
-        char buffer[BUFER_MAX] = {0};
+        char buffer[BUFFER_MAX] = {0};
 
         snprintf(filepath, sizeof(filepath), "/proc/%d/status", process.pid);
 
