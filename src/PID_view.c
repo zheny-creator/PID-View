@@ -1,3 +1,15 @@
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/resource.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <time.h>
+#include <getopt.h>
+#include <stdbool.h>
 #include "PID_view.h"
 #define BUFFER_MAX 1025
 #define PATH_MAX 32

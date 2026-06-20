@@ -1,4 +1,16 @@
 #include "PID_view.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/resource.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <time.h>
+#include <getopt.h>
+#include <stdbool.h>
 
 void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 {

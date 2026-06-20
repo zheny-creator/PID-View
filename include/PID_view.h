@@ -1,18 +1,7 @@
 #ifndef PID_VIEW_H
 #define PID_VIEW_H
 
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/resource.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <sys/types.h>
-#include <pwd.h>
-#include <time.h>
-#include <getopt.h>
-#include <stdbool.h>
 
 struct process_in_ram
 {
