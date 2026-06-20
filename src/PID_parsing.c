@@ -125,10 +125,11 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
     const char *line = buffer;
     long long all_memory = 0;
     int fd;
-    ssize_t read_buffer = read(fd, buffer, sizeof(buffer) - 1);
     snprintf(path, sizeof(path), "/proc/meminfo");
     if ((fd = open(path, O_RDONLY)) >= 0)
     {
+        ssize_t read_buffer = read(fd, buffer, sizeof(buffer) - 1);
+        close(fd);
         if (read_buffer > 0)
         {
             buffer[read_buffer] = '\0';
@@ -138,7 +139,6 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
     {
         proc->all_memory = 0;
     }
-    close(fd);
     while (*line)
     {
         if (strncmp(line, "MemTotal:", 9) == 0)
