@@ -36,7 +36,7 @@ void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 
     if (raw_uid != -1)
     {
-        struct passwd *pw = getpwuid(raw_uid);
+        const struct passwd *pw = getpwuid(raw_uid);
         if (pw)
             snprintf(proc->uid_name, sizeof(proc->uid_name), "%s", pw->pw_name);
         else
@@ -125,12 +125,11 @@ void parse_all_aviable_memory(struct process_in_ram *proc)
     const char *line = buffer;
     long long all_memory = 0;
     int fd;
-    ssize_t read_buffer;
-
+    ssize_t read_buffer = read(fd, buffer, sizeof(buffer) - 1);
     snprintf(path, sizeof(path), "/proc/meminfo");
     if ((fd = open(path, O_RDONLY)) >= 0)
     {
-        if ((read_buffer = read(fd, buffer, sizeof(buffer) - 1)) > 0)
+        if (read_buffer > 0)
         {
             buffer[read_buffer] = '\0';
         }
