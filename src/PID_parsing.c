@@ -38,7 +38,7 @@ void parse_proc_status(const char *buffer, struct process_in_ram *proc)
     {
         struct passwd *pw = getpwuid(raw_uid);
         if (pw)
-            strncpy(proc->uid_name, pw->pw_name, sizeof(proc->uid_name) - 1);
+            snprintf(proc->uid_name, sizeof(proc->uid_name), "%s", pw->pw_name);
         else
             snprintf(proc->uid_name, sizeof(proc->uid_name), "%d", raw_uid);
     }
