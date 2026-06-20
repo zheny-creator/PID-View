@@ -170,7 +170,7 @@ void usage(void)
 {
     fprintf(stdout, "Usage: pid-view [options]\n");
     fprintf(stdout, "   -h, --help           Show help message\n");
-    fprintf(stdout, "   -w, --watch <PID>    Monitor process activity\n");
+    fprintf(stdout, "   -w, --watch          Monitor process activity\n");
     fprintf(stdout, "   -s, --seconds <SEC>  Update interval in seconds\n");
     fprintf(stdout, "   <PID>                Display current process status\n");
 }

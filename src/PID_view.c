@@ -16,12 +16,12 @@ int main(int argc, char *argv[])
     static const struct option arguments[] =
         {
             {"help", no_argument, NULL, 'h'},
-            {"watch", required_argument, NULL, 'w'},
+            {"watch", no_argument, NULL, 'w'},
             {"seconds", required_argument, NULL, 's'},
             {NULL, 0, NULL, 0}};
     int opt;
     struct process_in_ram process = {0};
-    while ((opt = getopt_long(argc, argv, "hw:s:", arguments, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "hws:", arguments, NULL)) != -1)
     {
         switch (opt)
         {
