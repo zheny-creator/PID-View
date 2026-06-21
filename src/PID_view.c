@@ -10,12 +10,14 @@
 #include <time.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <termios.h>
 #include "PID_view.h"
 #define BUFFER_MAX 1025
 #define PATH_MAX 32
 
 int main(int argc, char *argv[])
 {
+    struct termios new_settings, old_settings;
     int watch = 0;
     char *endptr;
     long time = 0;
@@ -59,8 +61,27 @@ int main(int argc, char *argv[])
     pid_val = strtol(argv[optind], &endptr, 0);
     process.pid = (pid_t)pid_val;
     process.seconds_update = (int)time;
+    if (watch == 1 || watch == 2)
+    {
+        tcgetattr(STDIN_FILENO, &old_settings);
+        new_settings = old_settings;
+        new_settings.c_cc[VTIME] = 0;
+        new_settings.c_cc[VMIN] = 0;
+        new_settings.c_lflag &= ~ECHO;
+        new_settings.c_lflag &= ~ICANON;
+        tcsetattr(STDIN_FILENO, TCSANOW, &new_settings);
+    }
     while (true)
     {
+        char symbol_to_exit = {0};
+        if (watch == 1 || watch == 2)
+        {
+            ssize_t n = read(STDIN_FILENO, &symbol_to_exit, 1);
+            if (n > 0 && symbol_to_exit == 'q')
+            {
+                break;
+            }
+        }
         char filepath[PATH_MAX];
         char buffer[BUFFER_MAX] = {0};
 
@@ -118,17 +139,22 @@ int main(int argc, char *argv[])
 
         if (watch == 1)
         {
+
             sleep(1);
+            continue;
         }
         else if (watch == 2)
         {
+
             sleep(process.seconds_update);
+            continue;
         }
         if (watch == 0)
         {
             break;
         }
     }
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_settings);
 
     return 0;
 }
