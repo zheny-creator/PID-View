@@ -50,6 +50,11 @@ int main(int argc, char *argv[])
             errno = 0;
             watch = 2;
             time = strtol(optarg, &endptr, 0);
+            if (time <= 0)
+            {
+                fprintf(stderr, "enter a number greater than zero");
+                return 1;
+            }
             break;
         }
     }
@@ -91,6 +96,10 @@ int main(int argc, char *argv[])
         if (fd < 0)
         {
             fprintf(stderr, "Process %d not found or kill\n", process.pid);
+            if (watch == 1 || watch == 2)
+            {
+                tcsetattr(STDIN_FILENO, TCSANOW, &old_settings);
+            }
             return 1;
         }
 
@@ -100,6 +109,10 @@ int main(int argc, char *argv[])
         if (bytes_read <= 0)
         {
             fprintf(stderr, "Failed to read status\n");
+            if (watch == 1 || watch == 2)
+            {
+                tcsetattr(STDIN_FILENO, TCSANOW, &old_settings);
+            }
             return 1;
         }
         buffer[bytes_read] = '\0';
