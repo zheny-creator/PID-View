@@ -13,7 +13,7 @@
 #include <termios.h>
 #include "PID_view.h"
 #define BUFFER_MAX 1025
-#define PATH_MAX 32
+#define PATH_TO_FILE_MAX 32
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +55,16 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "enter a number greater than zero");
                 return 1;
             }
+            if (errno == ERANGE)
+            {
+                fprintf(stderr, "seconds value is out of range\n");
+                return 1;
+            }
+            if (*endptr != '\0')
+            {
+                fprintf(stderr, "Trailing garbage characters detected\n");
+                return 1;
+            }
             break;
         }
     }
@@ -63,7 +73,19 @@ int main(int argc, char *argv[])
         usage();
         return 1;
     }
+    errno = 0;
     pid_val = strtol(argv[optind], &endptr, 0);
+    if (errno == ERANGE)
+    {
+        fprintf(stderr, "PID value is out of range\n");
+        return 1;
+    }
+    if (*endptr != '\0')
+    {
+        fprintf(stderr, "Trailing garbage characters detected\n");
+        return 1;
+    }
+
     process.pid = (pid_t)pid_val;
     process.seconds_update = (int)time;
     if (watch == 1 || watch == 2)
@@ -87,7 +109,7 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-        char filepath[PATH_MAX];
+        char filepath[PATH_TO_FILE_MAX];
         char buffer[BUFFER_MAX] = {0};
 
         snprintf(filepath, sizeof(filepath), "/proc/%d/status", process.pid);
