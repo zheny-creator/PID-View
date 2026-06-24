@@ -57,7 +57,8 @@ void parse_proc_status(const char *buffer, struct process_in_ram *proc)
     }
     else
     {
-        strcpy(proc->uid_name, "unknown");
+        snprintf(proc->uid_name, sizeof(proc->uid_name), "%s",
+                 "unknown");
     }
 }
 
