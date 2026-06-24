@@ -11,6 +11,7 @@
 #include <time.h>
 #include <getopt.h>
 #include <stdbool.h>
+#define BUFFER_MAX 1024
 
 void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 {
@@ -63,7 +64,7 @@ void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 void parse_advanced_metrics(struct process_in_ram *proc)
 {
     char path[32];
-    char buf[512];
+    char buf[BUFFER_MAX];
     int fd;
     ssize_t n;
 
@@ -133,7 +134,7 @@ void parse_advanced_metrics(struct process_in_ram *proc)
 void parse_all_aviable_memory(struct process_in_ram *proc)
 {
     char path[32];
-    char buffer[1024] = {0};
+    char buffer[BUFFER_MAX] = {0};
     const char *line = buffer;
     long long all_memory = 0;
     int fd;
