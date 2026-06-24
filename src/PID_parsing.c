@@ -12,7 +12,7 @@
 #include <getopt.h>
 #include <stdbool.h>
 #define BUFFER_MAX 1024
-
+#define PATH_TO_FILE_MAX 32
 void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 {
     const char *line = buffer;
@@ -63,13 +63,25 @@ void parse_proc_status(const char *buffer, struct process_in_ram *proc)
 
 void parse_advanced_metrics(struct process_in_ram *proc)
 {
-    char path[32];
+    char path[PATH_TO_FILE_MAX];
     char buf[BUFFER_MAX];
     int fd;
     ssize_t n;
 
+    errno = 0;
     long page_size = sysconf(_SC_PAGESIZE);
+    if (page_size == -1)
+    {
+        proc->vmem_mb = 0;
+        proc->rss_mb = 0;
+    }
+    errno = 0;
     long clock_ticks = sysconf(_SC_CLK_TCK);
+    if (clock_ticks == -1)
+    {
+        proc->vmem_mb = 0;
+        proc->rss_mb = 0;
+    }
 
     snprintf(path, sizeof(path), "/proc/%d/statm", proc->pid);
     if ((fd = open(path, O_RDONLY)) >= 0)
@@ -133,7 +145,7 @@ void parse_advanced_metrics(struct process_in_ram *proc)
 
 void parse_all_aviable_memory(struct process_in_ram *proc)
 {
-    char path[32];
+    char path[PATH_TO_FILE_MAX];
     char buffer[BUFFER_MAX] = {0};
     const char *line = buffer;
     long long all_memory = 0;
